@@ -10,21 +10,30 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 
 // Rutas
 app.get('/', (req, resp, next) => {
-    Usuario.find({}, 'nombre email img role').exec( //Se indica los campos que quiero retornar
-        (err, usuarios) => {
-            if (err) {
-                return resp.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al cargar usuarios',
-                    errors: err
-                })
-            } else {
-                resp.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
-                })
-            }
-        })
+    var desde = Number(req.query.start || 0);
+    Usuario.find({}, 'nombre email img role')
+        .skip(desde)
+        .limit(5)
+        .exec( //Se indica los campos que quiero retornar
+            (err, usuarios) => {
+                if (err) {
+                    return resp.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al cargar usuarios',
+                        errors: err
+                    })
+                } else {
+
+                    Usuario.count({}, (err, count) => {
+                        resp.status(200).json({
+                            ok: true,
+                            usuarios: usuarios,
+                            total: count
+                        })
+                    });
+
+                }
+            })
 });
 
 
